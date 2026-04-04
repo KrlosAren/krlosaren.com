@@ -24,7 +24,7 @@ $paginator.Pages -}}<!---->
   <div class="shrink-0 overflow-hidden rounded-full border-[0.5px] border-black/10" style="width: min(150px, 35vw); height: min(150px, 35vw); margin-bottom: 1rem;">
     <img
       class="not-prose my-0 h-full w-full rounded-full object-cover"
-      src="{{- site.Params.avatar -}}"
+      src="{{- site.Params.avatar | absURL -}}"
       alt="{{- site.Params.name | default site.Title -}}"
     />
   </div>
