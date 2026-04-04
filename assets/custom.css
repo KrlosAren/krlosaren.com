@@ -1,0 +1,22 @@
+@reference './app.css';
+
+:root:not(#\#) {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.prose h1 {
+  font-size: 1.75em !important;
+}
+
+.prose h2 {
+  font-size: 1.17em !important;
+}
+
+.prose h3 {
+  font-size: 0.97em !important;
+}
+
+.prose h4 {
+  font-size: 0.78em !important;
+}
+

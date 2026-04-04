@@ -1,0 +1,16 @@
+{{- define "main" -}}
+
+{{- range .Pages.GroupByDate "2006" -}}
+<div class="mb-10">
+  <div class="mb-4 text-sm tracking-wider opacity-40 uppercase">{{- .Key -}}</div>
+  {{- range .Pages -}}
+  <section class="relative my-4">
+    <h2 class="my-0!">{{- .Title -}}</h2>
+    <time class="text-xs antialiased opacity-60">{{- .Date | time.Format ":date_medium" -}}</time>
+    <a class="absolute inset-0 text-[0px]" href="{{- .Permalink -}}">{{- .Title -}}</a>
+  </section>
+  {{- end -}}
+</div>
+{{- end -}}
+
+{{- end -}}

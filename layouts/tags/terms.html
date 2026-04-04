@@ -1,0 +1,18 @@
+{{- define "main" -}}
+
+<h1 class="mb-8">Tags</h1>
+
+<div class="flex flex-wrap" style="gap: 0.5em;">
+  {{- range .Data.Terms.Alphabetical -}}
+  <a
+    href="{{- .Page.Permalink -}}"
+    class="not-prose rounded-lg px-4 py-1.5 no-underline"
+    style="background: rgba(0,0,0,0.05); padding: 0.25em 1em;"
+  >
+    {{- .Page.Title -}}
+    <span class="opacity-50 text-sm ml-1">({{- .Count -}})</span>
+  </a>
+  {{- end -}}
+</div>
+
+{{- end -}}
