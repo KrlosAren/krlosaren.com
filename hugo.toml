@@ -48,6 +48,10 @@ theme = "paper"
   tag = "tags"
   series = "series"
 
+[services]
+  [services.googleAnalytics]
+    id = 'G-8PG7YW77JJ'
+
 [privacy]
   [privacy.youtube]
     disabled = false
