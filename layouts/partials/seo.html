@@ -1,0 +1,49 @@
+{{- $title := .Title | default site.Title -}}
+{{- $description := .Description | default site.Params.description | default site.Title -}}
+{{- $url := .Permalink | default site.BaseURL -}}
+{{- $siteName := site.Title -}}
+{{- $image := "" -}}
+
+{{/* imagen: primero del front matter, luego site params */}}
+{{- if .Params.images -}}
+  {{- $image = index .Params.images 0 | absURL -}}
+{{- else if site.Params.images -}}
+  {{- $image = index site.Params.images 0 | absURL -}}
+{{- end -}}
+
+<!-- SEO básico -->
+<meta name="description" content="{{- $description -}}" />
+
+<!-- Open Graph -->
+<meta property="og:site_name" content="{{- $siteName -}}" />
+<meta property="og:title" content="{{- $title -}}" />
+<meta property="og:description" content="{{- $description -}}" />
+<meta property="og:url" content="{{- $url -}}" />
+<meta property="og:locale" content="{{- site.LanguageCode -}}" />
+{{- if .IsPage }}
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="{{- .Date.Format "2006-01-02T15:04:05Z07:00" -}}" />
+<meta property="article:modified_time" content="{{- .Lastmod.Format "2006-01-02T15:04:05Z07:00" -}}" />
+{{- if .Params.tags -}}
+{{- range .Params.tags -}}
+<meta property="article:tag" content="{{- . -}}" />
+{{- end -}}
+{{- end -}}
+{{- else }}
+<meta property="og:type" content="website" />
+{{- end }}
+{{- if $image }}
+<meta property="og:image" content="{{- $image -}}" />
+<meta property="og:image:alt" content="{{- $title -}}" />
+{{- end }}
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{- $title -}}" />
+<meta name="twitter:description" content="{{- $description -}}" />
+{{- if $image }}
+<meta name="twitter:image" content="{{- $image -}}" />
+{{- end }}
+
+<!-- Canonical -->
+<link rel="canonical" href="{{- $url -}}" />

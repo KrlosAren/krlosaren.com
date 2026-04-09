@@ -13,22 +13,10 @@
 
   <!-- meta -->
   <meta name="theme-color" />
+  <meta name="author" content="{{- or .Params.author site.Params.author site.Title -}}" />
 
-  <!-- author -->
-  {{- $site_author := or .Params.author site.Params.author site.Title -}}
-
-  <!---->
-  {{- if eq .Kind "page" -}}
-  <meta name="description" content="{{- .Summary -}}" />
-  <meta name="author" content="{{- or .Params.author $site_author -}}" />
-  {{- else -}}
-  <!---->
-  <meta
-    name="description"
-    content="{{- site.Params.description | default (print `A personal blog`) -}}"
-  />
-  <meta name="author" content="{{- $site_author -}}" />
-  {{- end -}}
+  <!-- SEO & OG -->
+  {{- partial "seo.html" . -}}
 
   <!-- custom styles -->
   <style>
@@ -94,14 +82,8 @@
 
   <!-- production -->
   {{- if or hugo.IsProduction (eq site.Params.env "production") -}}
-  <!---->
   {{- template "_internal/google_analytics.html" . -}}
-  <!---->
   {{- template "_internal/schema.html" . -}}
-  <!---->
-  {{- template "_internal/opengraph.html" . -}}
-  <!---->
-  {{- template "_internal/twitter_cards.html" . -}}
   <!-- RSS -->
   {{- range .AlternativeOutputFormats -}}
   <link
@@ -111,9 +93,6 @@
     title="{{- site.Title -}}"
   />
   {{- end -}}
-
-  <!-- canonical -->
-  <link rel="canonical" href="{{- .Permalink -}}" />
   {{- end -}}
   <!---->
 </head>
