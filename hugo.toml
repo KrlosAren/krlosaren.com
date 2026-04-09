@@ -21,6 +21,7 @@ theme = "paper"
   description = 'DevOps & Cloud Engineer con más de 5 años de experiencia en AWS, Terraform y CI/CD. Blog sobre cloud, infraestructura, contenedores y tecnología.'
   images = ['/thumbnail_cta.png']
 
+
 [markup]
   [markup.goldmark]
     [markup.goldmark.renderer]
