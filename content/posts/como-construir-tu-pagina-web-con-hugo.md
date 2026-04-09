@@ -29,7 +29,7 @@ Una vez instalado, lo siguiente es elegir un tema. Hay muchas opciones en [theme
 
 No te voy a mentir: lo más divertido de construir esta página fue agarrar Claude, crear un directorio y explicarle qué quería hacer, qué tema quería usar y pedirle que fuera armando el portfolio conmigo. Fue rápido y directo. Pero tampoco te mentiré en que necesitaba saber qué quería. Haber trabajado antes con CSS, HTML y Markdown me permitió pedir cosas de manera explícita y avanzar más rápido.
 
-Tenía ya una primera versión de mi página —la había construido con Vercel, lo que era un poco *overkill* para lo que necesitaba. Decidí rehacerla con Hugo, enfocando los esfuerzos en algo simple y claro.
+Tenía ya una [primera versión de mi página](https://krlosaren-rebuild.vercel.app/) —la había construido con Vercel, lo que era un poco *overkill* para lo que necesitaba. Decidí rehacerla con Hugo, enfocando los esfuerzos en algo simple y claro.
 
 ## El resultado
 
