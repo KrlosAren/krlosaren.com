@@ -1,7 +1,7 @@
 baseURL = 'https://krlosaren.com/'
 languageCode = 'es'
 DefaultContentLanguage = 'es'
-title = "Carlos López Zavarce"
+title = "Carlos López Zavarce | DevOps & Cloud Engineer"
 copyright = "© 2026, Carlos López Zavarce"
 enableInlineShortcodes = true
 ignoreErrors = ["error-remote-getjson"]
@@ -18,6 +18,8 @@ theme = "paper"
   avatar = '/profile_img.jpeg'
   name = 'Carlos López Zavarce'
   bio = 'DevOps & Cloud Engineer | Solutions Architect'
+  description = 'DevOps & Cloud Engineer con más de 5 años de experiencia en AWS, Terraform y CI/CD. Blog sobre cloud, infraestructura, contenedores y tecnología.'
+  images = ['/thumbnail.png']
 
 [markup]
   [markup.goldmark]
