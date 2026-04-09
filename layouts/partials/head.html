@@ -13,7 +13,7 @@
 
   <!-- meta -->
   <meta name="theme-color" />
-  <meta name="author" content="{{- or .Params.author site.Params.author site.Title -}}" />
+  <meta name="author" content="{{- or .Params.author site.Params.author site.Params.name -}}" />
 
   <!-- SEO & OG -->
   {{- partial "seo.html" . -}}
@@ -43,12 +43,9 @@
   <link rel="preload stylesheet" as="style" href="{{- $css.Permalink -}}" integrity="{{ $css.Data.Integrity }}" />
 
   <!-- avatar -->
-  {{- $avatar_url := $.Scratch.Get "avatar_url" -}}
-  <!---->
-  {{- if $avatar_url -}}
-  <link rel="preload" as="image" href="{{- $avatar_url -}}" />
+  {{- with site.Params.avatar -}}
+  <link rel="preload" as="image" href="{{- . | absURL -}}" />
   {{- end -}}
-  <!---->
 
   <!-- highlight js -->
   {{- if and .IsPage (not site.Params.disableHLJS) -}}
