@@ -4,6 +4,7 @@ DefaultContentLanguage = 'es'
 title = "Carlos López Zavarce | DevOps & Cloud Engineer | AWS"
 copyright = "© 2026, Carlos López Zavarce"
 enableInlineShortcodes = true
+enableRobotsTXT = true
 ignoreErrors = ["error-remote-getjson"]
 
 theme = "paper"
