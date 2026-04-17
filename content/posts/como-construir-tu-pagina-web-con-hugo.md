@@ -2,6 +2,7 @@
 date = '2026-04-03'
 draft = false
 title = 'Cómo construir tu página web con Hugo'
+description = "Crear una pagina web o blog con Hugo de manera rapida usando markdown."
 tags = ['web','blog']
 +++
 
