@@ -20,3 +20,29 @@
   font-size: 0.78em !important;
 }
 
+/* Copy code button */
+article pre {
+  position: relative;
+}
+
+article pre .copy-code-btn {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+
+  background: rgba(0,0,0,0.06) !important;
+  color: rgb(252, 113, 0) !important;
+  padding: 0.25rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 4px !important;
+}
+
+article pre:hover .copy-code-btn,
+article pre .copy-code-btn:focus {
+  opacity: 1 !important;
+}
+

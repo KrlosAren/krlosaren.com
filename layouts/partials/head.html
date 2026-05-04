@@ -56,6 +56,12 @@
   ></script>
   {{- end -}}
 
+  <!-- copy code button -->
+  {{- if .IsPage -}}
+  {{- $copyCode := resources.Get "copy-code.js" | minify | fingerprint -}}
+  <script defer src="{{- $copyCode.Permalink -}}" integrity="{{ $copyCode.Data.Integrity }}"></script>
+  {{- end -}}
+
   <!-- math -->
   {{- if or .Params.math site.Params.math -}}
   <!---->
