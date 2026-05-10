@@ -4,7 +4,7 @@ draft = false
 title = 'CI/CD con GitHub Actions, ECR y ECS: de push a producción sin tocar la consola'
 description = 'Automatiza el despliegue de tu aplicación contenerizada en AWS ECS usando GitHub Actions, ECR y Task Definitions. Paso a paso desde el pipeline hasta el deploy.'
 tags = ['devops', 'aws', 'ecs', 'ecr', 'github-actions', 'cicd', 'containers']
-images = ['/hero_cicd_ecs_post.png']
+images = ['/hero_cicd_ecs_post.webp']
 +++
 
 Tienes tu aplicación contenerizada, el `Dockerfile` listo, y ya probaste que corre bien en local. El siguiente paso es mandarlo a producción — pero no quieres hacer eso a mano cada vez. Quieres hacer `git push` y que el resto pase solo.
