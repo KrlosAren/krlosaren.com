@@ -23,6 +23,17 @@
     {{- end -}}
   </header>
 
+  {{- if .Params.images -}}
+  <figure class="mb-10">
+    <img
+      src="{{ index .Params.images 0 | absURL }}"
+      alt="{{ .Title }}"
+      class="w-full rounded-lg"
+      loading="eager"
+    />
+  </figure>
+  {{- end -}}
+
   <section>{{- .Content -}}</section>
 
   <!-- Post Tags -->

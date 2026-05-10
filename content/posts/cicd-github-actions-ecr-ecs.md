@@ -383,6 +383,4 @@ aws iam delete-user --user-name pipeline-user
 
 ## Próximos pasos
 
-Este pipeline funciona y te tiene en producción rápido, pero las access keys son credenciales de larga vida que rotan mal y son difíciles de auditar. El siguiente paso natural es **migrar a OIDC con un IAM Role**: el runner asume el role solo durante la corrida del pipeline, sin credenciales guardadas en GitHub. Lo cubrimos en otro post de la serie.
-
-Otras direcciones naturales para los siguientes artículos: agregar tests automáticos entre el build y el deploy, configurar notificaciones a Slack cuando algo falla, o cachear las layers de Docker en ECR para acelerar builds.
+Este pipeline funciona y te tiene en producción rápido, pero las access keys son credenciales de larga vida que rotan mal y son difíciles de auditar. El siguiente paso natural es **migrar a OIDC con un IAM Role**: el runner asume el role solo durante la corrida del pipeline, sin credenciales guardadas en GitHub. Lo cubrimos en otro post.
