@@ -34,7 +34,7 @@ El paso que más sorprende es el tercero. Muchos asumen que basta con subir una 
 
 Para que no tengas que escribir el `Dockerfile`, el `task-definition.json`, la app de prueba y el workflow desde cero, hay un repo template listo para usar:
 
-> **[github.com/krlosaren/krlosaren-cicd-ecr-ecs-aws](https://github.com/krlosaren/krlosaren-cicd-ecr-ecs-aws)** — click en *"Use this template"* y obtienes una copia limpia en tu cuenta.
+> **[github.com/krlosaren/krlosaren-cicd-ecr-ecs-aws](https://github.com/krlosaren/krlosaren-cicd-ecr-ecs-aws){:target="_blank"}** — click en *"Use this template"* y obtienes una copia limpia en tu cuenta.
 
 Adentro hay una app Express (Node.js, port 3000) con un toggle `V1`/`V2` perfecto para visualizar el rolling deploy en acción: cuando mergeas el PR que cambia de V1 a V2, puedes refrescar la URL y ver cómo se alternan las dos versiones hasta que ECS estabiliza en V2. El README del repo tiene el flujo paso a paso.
 

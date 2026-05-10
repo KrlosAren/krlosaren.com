@@ -4,7 +4,7 @@ draft = false
 title = '100 Days of DevOps: Cómo KodeKloud me dio estructura para practicar de verdad'
 description = 'La práctica hace al maestro, pero primero necesitas saber qué practicar. Así es cómo KodeKloud y el reto 100 Days of DevOps transformaron mi forma de aprender.'
 tags = ['devops', 'learning', 'linux', 'git']
-images = ['/hero_img_kodekloud_post.webp']
+images = ['/hero_img_kodekloud_post_v2.webp']
 +++
 
 La práctica constante hace al maestro — algo que hemos escuchado mil veces. Pero hay una pregunta que nadie responde: **¿qué practicamos cuando estamos empezando?**
