@@ -1,6 +1,6 @@
 +++
-date = '2026-05-02'
-draft = true
+date = '2026-05-09'
+draft = false
 title = 'CI/CD con GitHub Actions, ECR y ECS: de push a producción sin tocar la consola'
 description = 'Automatiza el despliegue de tu aplicación contenerizada en AWS ECS usando GitHub Actions, ECR y Task Definitions. Paso a paso desde el pipeline hasta el deploy.'
 tags = ['devops', 'aws', 'ecs', 'ecr', 'github-actions', 'cicd', 'containers']
@@ -30,11 +30,20 @@ git push → GitHub Actions → build imagen Docker
 
 El paso que más sorprende es el tercero. Muchos asumen que basta con subir una imagen nueva a ECR y el Service se actualiza solo — no funciona así. ECS trabaja con **Task Definitions**: un documento que describe qué imagen usar, cuánta CPU/memoria asignar, variables de entorno, puertos, etc. Para desplegar una versión nueva hay que crear una nueva **revisión** del Task Definition con el nuevo URI de imagen, y luego decirle al Service que use esa revisión.
 
+## Repo de ejemplo
+
+Para que no tengas que escribir el `Dockerfile`, el `task-definition.json`, la app de prueba y el workflow desde cero, hay un repo template listo para usar:
+
+> **[github.com/krlosaren/krlosaren-cicd-ecr-ecs-aws](https://github.com/krlosaren/krlosaren-cicd-ecr-ecs-aws)** — click en *"Use this template"* y obtienes una copia limpia en tu cuenta.
+
+Adentro hay una app Express (Node.js, port 3000) con un toggle `V1`/`V2` perfecto para visualizar el rolling deploy en acción: cuando mergeas el PR que cambia de V1 a V2, puedes refrescar la URL y ver cómo se alternan las dos versiones hasta que ECS estabiliza en V2. El README del repo tiene el flujo paso a paso.
+
 ## Pre-requisitos
 
 Para seguir el post necesitas:
 
 - Una cuenta AWS con permisos para crear recursos en ECR, ECS e IAM
+- AWS CLI instalado y configurado con `aws configure` — si nunca lo hiciste, la [guía oficial de AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) te lleva paso a paso
 - Un repositorio ECR creado (`aws ecr create-repository --repository-name mi-app`)
 - Tu aplicación con un `Dockerfile` que ya construya correctamente en local
 - Tu repo en GitHub
@@ -45,7 +54,73 @@ Si todavía no tienes el cluster ECS, service y task definition, no te preocupes
 
 Si todavía no tienes el cluster, service y task definition creados, este es el camino más corto. Vamos a levantar un service corriendo `nginx:latest` como placeholder — el pipeline después lo reemplaza con tu imagen real.
 
-**1. Task Definition** — guárdalo como `task-definition.json`:
+**1. Setup de red** — encuentra tu VPC default y elige una subnet pública:
+
+```bash
+DEFAULT_VPC=$(aws ec2 describe-vpcs \
+  --filters Name=is-default,Values=true \
+  --query 'Vpcs[0].VpcId' --output text)
+
+# Lista las subnets públicas (las que asignan IP pública por default)
+aws ec2 describe-subnets \
+  --filters "Name=vpc-id,Values=$DEFAULT_VPC" "Name=map-public-ip-on-launch,Values=true" \
+  --query 'Subnets[*].[SubnetId,AvailabilityZone]' \
+  --output table
+```
+
+Anota uno de los `subnet-...` y guárdalo en una variable. Después crea el security group con los puertos abiertos:
+
+```bash
+SUBNET_ID=subnet-xxxxxxxx  # reemplaza con uno de los listados arriba
+
+SG_ID=$(aws ec2 create-security-group \
+  --group-name mi-app-sg \
+  --description "SG para mi-app" \
+  --vpc-id $DEFAULT_VPC \
+  --query 'GroupId' --output text)
+
+# Puerto 80 — para verificar el placeholder de nginx en este bootstrap
+aws ec2 authorize-security-group-ingress \
+  --group-id $SG_ID --protocol tcp --port 80 --cidr 0.0.0.0/0
+
+# Puerto 3000 — donde correrá tu app real cuando el pipeline la deploye
+aws ec2 authorize-security-group-ingress \
+  --group-id $SG_ID --protocol tcp --port 3000 --cidr 0.0.0.0/0
+
+echo "Subnet: $SUBNET_ID  /  SG: $SG_ID"
+```
+
+![Reglas inbound del security group en la consola AWS](/ci-cd-aws-security-groups.jpg)
+*Las dos reglas inbound del SG después de los comandos: HTTP en 80 y Custom TCP en 3000, ambas desde `0.0.0.0/0`.*
+
+> Abrir `0.0.0.0/0` está bien para un setup personal de prueba. En producción acota el CIDR a tu IP o a un load balancer.
+
+**2. Task Execution Role** — el role que ECS usa para tirar imágenes de ECR y mandar logs a CloudWatch. Si nunca usaste ECS no existe todavía:
+
+```bash
+cat > trust-policy.json <<'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {"Service": "ecs-tasks.amazonaws.com"},
+    "Action": "sts:AssumeRole"
+  }]
+}
+EOF
+
+aws iam create-role \
+  --role-name ecsTaskExecutionRole \
+  --assume-role-policy-document file://trust-policy.json
+
+aws iam attach-role-policy \
+  --role-name ecsTaskExecutionRole \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+```
+
+Si ya existe (porque usaste ECS antes), `create-role` te tira `EntityAlreadyExists` — sáltate este paso.
+
+**3. Task Definition** — guárdalo como `task-definition.json` (reemplaza `<ACCOUNT_ID>` con el ID de tu cuenta AWS):
 
 ```json
 {
@@ -64,23 +139,47 @@ Si todavía no tienes el cluster, service y task definition creados, este es el 
 }
 ```
 
-**2. Cluster + Service** — registra el TD y crea la infraestructura:
+**4. Cluster + Service** — registra el TD y crea la infraestructura usando las variables del paso 1:
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://task-definition.json
 aws ecs create-cluster --cluster-name mi-cluster
+
 aws ecs create-service \
   --cluster mi-cluster \
   --service-name mi-app-service \
   --task-definition mi-app \
   --desired-count 1 \
   --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx],securityGroups=[sg-xxx],assignPublicIp=ENABLED}"
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_ID],securityGroups=[$SG_ID],assignPublicIp=ENABLED}"
 ```
 
-Reemplaza `subnet-xxx` y `sg-xxx` con IDs de tu VPC default. Si nunca tocaste VPC, AWS te crea una al abrir la cuenta — la consola te da los IDs.
+**5. Verifica que el task está corriendo** — espera ~30 segundos y obtén la IP pública:
 
-**3. IAM User para el pipeline** — la policy mínima que necesita:
+```bash
+TASK_ARN=$(aws ecs list-tasks \
+  --cluster mi-cluster --service-name mi-app-service \
+  --query 'taskArns[0]' --output text)
+
+ENI_ID=$(aws ecs describe-tasks \
+  --cluster mi-cluster --tasks $TASK_ARN \
+  --query 'tasks[0].attachments[0].details[?name==`networkInterfaceId`].value' \
+  --output text)
+
+PUBLIC_IP=$(aws ec2 describe-network-interfaces \
+  --network-interface-ids $ENI_ID \
+  --query 'NetworkInterfaces[0].Association.PublicIp' \
+  --output text)
+
+echo "http://$PUBLIC_IP"
+```
+
+![Detalle del task corriendo en la consola ECS](/ci-cd-aws-ip-publica.jpg)
+*Lo mismo desde la consola: en el detalle del task, la sección "Network bindings" te muestra el container port, el host port y un link directo "open address". Útil cuando quieres saltarte el CLI.*
+
+Abre esa URL en el navegador — deberías ver el "Welcome to nginx!". Si lo ves, el cluster, el service y la red están funcionando: el pipeline tiene todo lo que necesita para empezar a desplegar tu app real sobre esa misma infraestructura.
+
+**6. IAM User para el pipeline** — la policy mínima que necesita:
 
 ```json
 {
@@ -94,6 +193,7 @@ Reemplaza `subnet-xxx` y `sg-xxx` con IDs de tu VPC default. Si nunca tocaste VP
       "ecr:UploadLayerPart",
       "ecr:CompleteLayerUpload",
       "ecr:PutImage",
+      "ecr:BatchGetImage",
       "ecs:DescribeTaskDefinition",
       "ecs:RegisterTaskDefinition",
       "ecs:DescribeServices",
@@ -235,6 +335,9 @@ Con esto en su lugar, el flujo completo queda:
 
 Sin abrir la consola. Sin clicks. El pipeline falla ruidosamente si algo sale mal, y no toca producción hasta que la imagen está lista.
 
+![Lista de runs del workflow en GitHub Actions](/ci-cd-aws-actions-runs.jpg)
+*Una sesión típica de armado: los primeros runs fallaron (permisos faltantes, secrets mal cargados, container-name que no matcheaba), hasta que estabilizó en verde. El pipeline ruidoso te dice exactamente qué romper para que el siguiente PR pase.*
+
 ¿Y si algo sale mal una vez que ya está en producción? El rollback es una sola línea:
 
 ```bash
@@ -245,6 +348,38 @@ aws ecs update-service \
 ```
 
 ECS hace el rolling back con la misma estrategia con la que subió la versión nueva.
+
+## Limpiar los recursos
+
+Cuando termines de probar y quieras devolver la cuenta a cero (o al menos dejar de pagar por el service corriendo), este es el orden correcto de borrado. La regla es de afuera hacia adentro: primero apagas los tasks, después el service, después el cluster, y al final los recursos de red.
+
+```bash
+# 1. Apaga los tasks y elimina el service
+aws ecs update-service --cluster mi-cluster --service mi-app-service --desired-count 0
+aws ecs delete-service --cluster mi-cluster --service mi-app-service --force
+
+# 2. Elimina el cluster
+aws ecs delete-cluster --cluster mi-cluster
+
+# 3. Elimina el security group (sólo se puede borrar cuando ya nadie lo usa)
+aws ec2 delete-security-group --group-id $SG_ID
+
+# 4. Elimina el repo de ECR (--force borra también las imágenes adentro)
+aws ecr delete-repository --repository-name mi-app --force
+
+# 5. (Opcional) Elimina el ecsTaskExecutionRole si no lo vas a reusar
+aws iam detach-role-policy --role-name ecsTaskExecutionRole \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+aws iam delete-role --role-name ecsTaskExecutionRole
+
+# 6. Elimina el IAM User del pipeline
+aws iam list-access-keys --user-name pipeline-user
+aws iam delete-access-key --user-name pipeline-user --access-key-id <KEY_ID>
+aws iam detach-user-policy --user-name pipeline-user --policy-arn <POLICY_ARN>
+aws iam delete-user --user-name pipeline-user
+```
+
+> El subnet y la VPC default no los toques — son recursos compartidos que AWS te dio al abrir la cuenta. Borrarlos puede dejarte sin red para futuros experimentos.
 
 ## Próximos pasos
 
