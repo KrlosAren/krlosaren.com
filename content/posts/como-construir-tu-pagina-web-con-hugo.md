@@ -4,6 +4,7 @@ draft = false
 title = 'Cómo construir tu página web con Hugo'
 description = "Crear una pagina web o blog con Hugo de manera rapida usando markdown."
 tags = ['web','blog']
+images = ['/hero_hugo_post.webp']
 +++
 
 Muchas veces queremos hacer un portfolio, una página personal, algo que nos represente en internet. Y siempre pasa lo mismo: nos enfrentamos a la hoja en blanco.

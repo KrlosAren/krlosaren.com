@@ -4,6 +4,7 @@ draft = false
 title = 'Systemd para manejar contenedores'
 description = 'Cómo usar systemd para gestionar el ciclo de vida de tus contenedores Docker en producción'
 tags = ['linux', 'systemd', 'docker', 'contenedores', 'devops']
+images = ['/hero_systemd_post.webp']
 +++
 
 Cuando trabajas con contenedores en local todo funciona bien. Levantas tu stack con Docker, los servicios responden y puedes cerrar la terminal cuando quieras. El problema aparece cuando quieres desplegar en un servidor real.
